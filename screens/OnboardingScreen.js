@@ -1,8 +1,8 @@
 import * as React from "react";
 import { View, KeyboardAvoidingView, Text, TextInput, Image, Pressable, Platform, Alert, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { validateEmail, validateName } from "../utils/index";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OnboardingScreen = ({ navigation }) => {
   const [firstName, setFirstName] = React.useState("");
