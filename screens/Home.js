@@ -117,14 +117,18 @@ const Home = ({ navigation }) => {
             <Text style={styles.logoText}>Little lemon</Text>
           </View>
           {image ? (
-            <Image source={{ uri: image }} style={styles.profileImage} resizeMode="contain" />
+            <Pressable onPress={() => navigation.navigate("Profile")}>
+              <Image source={{ uri: image }} style={styles.profileImage} resizeMode="contain" />
+            </Pressable>
           ) : (
-            <View style={styles.noImage}>
-              <Text style={styles.sectionHeading}>
-                {firstName[0]?.toLocaleUpperCase()}
-                {lastName[0]?.toLocaleUpperCase()}
-              </Text>
-            </View>
+            <Pressable onPress={() => navigation.navigate("Profile")}>
+              <View style={styles.noImage}>
+                <Text style={styles.sectionHeading}>
+                  {firstName[0]?.toLocaleUpperCase()}
+                  {lastName[0]?.toLocaleUpperCase()}
+                </Text>
+              </View>
+            </Pressable>
           )}
         </View>
         <View style={styles.hero}>
