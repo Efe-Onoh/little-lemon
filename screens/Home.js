@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { SafeAreaView, KeyboardAvoidingView, ScrollView, View, Text, TextInput, Image, Pressable, FlatList, StyleSheet, Alert } from "react-native";
 import { Searchbar } from "react-native-paper";
-import { createTable, getMenuItems, saveMenuItems, filterByQueryAndCategories } from "../database";
+import { createTable, getMenuItems, saveMenuItems, filterByQueryAndCategories, fetchAllMenuItems } from "../database";
 import Filters from "../components/Filters";
 
 import debounce from "lodash.debounce";
@@ -13,58 +13,44 @@ const sections = ["starters", "mains", "desserts", "drinks"];
 const Home = ({ navigation }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [phoneError, setPhoneError] = useState("");
   const [image, setImage] = useState(null);
   const [searchBarText, setSearchBarText] = useState("");
   const [query, setQuery] = useState("");
   const [menuData, setMenuData] = useState([]);
-  const [preferences, setPreferences] = useState({
-    starters: false,
-    mains: false,
-    desserts: false,
-    drinks: false,
-  });
-  const [filterSelections, setFilterSelections] = useState(sections.map(() => false));
 
-  const updatePrefs = (key) => () =>
-    setPreferences((prevState) => ({
-      ...prevState,
-      [key]: !prevState[key],
-    }));
+  const [filterSelections, setFilterSelections] = useState(sections.map(() => false));
 
   const fetchData = async () => {
     try {
       const response = await fetch(API_URL);
       const json = await response.json();
-      console.log("menu json", json);
-      setMenuData(json.menu);
+
+      //setMenuData(json.menu); may change this line or add saveMenuItems here
       return json.menu;
     } catch (error) {
       console.error(error);
     }
-
     return [];
   };
 
+  //run once on start and subsequent renders
   useEffect(() => {
     (async () => {
       try {
-        fetchData();
         await createTable();
-        let menuItems = await getMenuItems();
-        console.log("menu items:", menuItems);
+
         // The application only fetches the menu data once from a remote URL
         // and then stores it into a SQLite database.
         // After that, every application restart loads the menu from the database
-        if (!menuItems.length) {
-          const result = await fetchData();
-          saveMenuItems(result);
-          menuItems = result;
-        }
+        let menuItems = await getMenuItems();
 
-        setMenuData(menuItems);
+        if (!menuItems.length) {
+          //on first try, menuItems is empty, save menuItems from api once
+          const result = await fetchData();
+          await saveMenuItems(result);
+          menuItems = await getMenuItems();
+        }
+        setMenuData(menuItems); //sets MenuData with menuItems which uses name,not title for rendering, wrong
       } catch (e) {
         // Handle error
         Alert.alert(e.message);
@@ -83,8 +69,7 @@ const Home = ({ navigation }) => {
       });
       try {
         const menuItems = await filterByQueryAndCategories(query, activeCategories);
-        console.log("filterbyqueryandcategories:: menuitems", menuItems);
-        setMenuData(menuItems);
+        setMenuData(menuItems); //fix this line confirm menuItems format
       } catch (e) {
         Alert.alert(e.message);
       }

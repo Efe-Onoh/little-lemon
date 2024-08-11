@@ -37,10 +37,10 @@ export default function HomeScreen() {
 
   return (
     <Stack.Navigator>
-      {userLoggedIn && <Stack.Screen name="" component={OnboardingScreen} />}
-      <Stack.Screen name="Login" component={OnboardingScreen} />
+      {!userLoggedIn && <Stack.Screen name="" component={OnboardingScreen} />}
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="Welcome" component={Home} />
+      <Stack.Screen name="Login" component={OnboardingScreen} />
     </Stack.Navigator>
   );
 }

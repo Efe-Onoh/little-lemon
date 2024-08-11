@@ -31,7 +31,6 @@ const Profile = ({ navigation }) => {
       try {
         const values = await AsyncStorage.multiGet(["firstname", "lastname", "email", "avatar"]);
 
-        console.log("values:", values);
         if (values[0][1]) {
           setFirstName(values[0][1]);
         }
@@ -52,7 +51,6 @@ const Profile = ({ navigation }) => {
     (async () => {
       try {
         const values = await AsyncStorage.multiGet(Object.keys(preferences));
-        console.log("the values gotten are:", values);
 
         const initialState = values.reduce((acc, curr) => {
           acc[curr[0]] = JSON.parse(curr[1]);
@@ -134,7 +132,6 @@ const Profile = ({ navigation }) => {
     try {
       const keys = await AsyncStorage.getAllKeys(); // Get all keys
       const result = await AsyncStorage.multiGet(keys); // Get key-value pairs
-      console.log("result:", result); // Store the result in state
     } catch (error) {
       console.error("Error fetching data from AsyncStorage:", error);
     }

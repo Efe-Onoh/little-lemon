@@ -10,7 +10,16 @@ export async function createTable() {
   return new Promise((resolve, reject) => {
     db.transaction(
       (tx) => {
-        tx.executeSql("create table if not exists menu (id integer primary key not null, name text, price text, description text, category text, image text);");
+        tx.executeSql(
+          "create table if not exists menu (id integer primary key not null, name text, price text, description text, category text, image text);",
+          [],
+          (_, result) => {
+            console.log("createTable success===>", result);
+          },
+          (_, error) => {
+            console.log("createTable error===>", error);
+          }
+        );
       },
       reject,
       resolve
@@ -21,21 +30,38 @@ export async function createTable() {
 export async function getMenuItems() {
   return new Promise((resolve) => {
     db.transaction((tx) => {
-      tx.executeSql("select * from menu", [], (_, { rows }) => {
-        resolve(rows._array);
-      });
+      tx.executeSql(
+        "select * from menu",
+        [],
+        (_, { rows }) => {
+          console.log("getMenuItems success===>", rows._array);
+          resolve(rows._array);
+        },
+        (_, error) => {
+          console.log("getMenuItems error===>", error);
+        }
+      );
     });
   });
 }
 
-export function saveMenuItems(menuItems) {
-  console.log("saving menu items----", menuItems);
-  db.transaction((tx) => {
-    tx.executeSql(
-      `insert into menu (name, price, description, category, image) values ${menuItems
-        .map((item, idx) => `('${item.name}','${item.price}','${item.description}','${item.category}','${item.image}')`)
-        .join(", ")} `
-    );
+export async function saveMenuItems(menuItems) {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `insert into menu(name, price, description, category, image) values${menuItems
+          .map((item, idx) => `("${item.name}","${item.price}","${item.description}","${item.category}","${item.image}")`)
+          .join(", ")}`,
+        [],
+        (_, result) => {
+          console.log("insert successful ===> ", result);
+          resolve(result);
+        },
+        (_, error) => {
+          console.log("insert error ===> ", error);
+        }
+      );
+    });
   });
 }
 
@@ -44,14 +70,21 @@ export async function filterByQueryAndCategories(query, activeCategories) {
     // resolve(SECTION_LIST_MOCK_DATA);
     const queryWithWildcards = `%${query}%`;
     const placeholders = activeCategories.map(() => "?").join(", ");
+    let sql = `select * from menu where category in (${placeholders})`;
+    if (query.length > 0) {
+      sql += ` AND name like '%${query}%'`;
+    }
     db.transaction((tx) => {
       tx.executeSql(
-        `select * from menu where name like ? and category in (${placeholders})`,
-        [queryWithWildcards, ...activeCategories],
+        sql,
+        [...activeCategories, queryWithWildcards],
         (_, { rows }) => {
+          console.log("filter success===>", rows._array);
+
           resolve(rows._array);
         },
-        (tx, error) => {
+        (_, error) => {
+          console.log("filter error===>", error);
           reject(error);
         }
       );
